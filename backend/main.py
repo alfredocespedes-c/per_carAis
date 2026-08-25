@@ -28,7 +28,7 @@ ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
-app = FastAPI(title="per_carAis API", version="1.2.0")
+app = FastAPI(title="per_carAis API", version="1.2.1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -39,6 +39,7 @@ app.add_middleware(
 
 CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 FACE_CASCADE = cv2.CascadeClassifier(CASCADE_PATH)
+SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".jfif", ".png", ".webp"}
 
 
 def db():
@@ -85,8 +86,11 @@ def now_iso():
 
 def save_upload(upload: UploadFile, folder: Path) -> Path:
     ext = Path(upload.filename or "").suffix.lower()
-    if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
-        raise HTTPException(status_code=400, detail="Formato no soportado. Usa JPG, PNG o WEBP.")
+    if ext not in SUPPORTED_IMAGE_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Formato no soportado. Usa JPG, JPEG, JFIF, PNG o WEBP.",
+        )
     folder.mkdir(parents=True, exist_ok=True)
     target = folder / f"{uuid.uuid4().hex}{ext}"
     with target.open("wb") as f:
@@ -167,7 +171,7 @@ def build_recognizer():
 
 @app.get("/")
 def index():
-    return {"ok": True, "service": "per_carAis", "version": "1.2.0", "docs": "/docs"}
+    return {"ok": True, "service": "per_carAis", "version": "1.2.1", "docs": "/docs"}
 
 
 @app.get("/api/health")
@@ -175,9 +179,10 @@ def health():
     return {
         "ok": True,
         "service": "per_carAis",
-        "version": "1.2.0",
+        "version": "1.2.1",
         "engine": "opencv-lbph",
         "match_threshold": LBPH_THRESHOLD,
+        "supported_formats": ["jpg", "jpeg", "jfif", "png", "webp"],
         "storage": "ephemeral-local",
     }
 
