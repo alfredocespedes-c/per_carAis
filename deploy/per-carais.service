@@ -1,0 +1,14 @@
+[Unit]
+Description=per_carAis API
+After=network.target
+
+[Service]
+Type=simple
+User=acespedes
+WorkingDirectory=/home/acespedes/dev/per_carAis
+ExecStart=/home/acespedes/dev/per_carAis/.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8301
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
