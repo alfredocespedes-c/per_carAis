@@ -2,92 +2,133 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>per_carAis · Búsqueda facial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1720" />
+  <title>CarAis · Reconocimiento facial</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div>
       <span class="eyebrow">PER · CARAIS</span>
-      <h1>Búsqueda facial en fotografías</h1>
-      <p>Prueba integral · Frontend + servidor propio + InsightFace</p>
+      <h1>Reconocimiento facial</h1>
+      <p>Identifica personas registradas usando una foto o un video de hasta 2 segundos.</p>
     </div>
-    <div id="health" class="status">Conectando a API interna</div>
+    <button id="health" class="status" type="button" title="Revisar conexión">Conectando…</button>
   </header>
 
-  <main class="layout">
-    <section class="card full connection-card">
-      <h2>Conexión al motor de análisis</h2>
-      <p class="muted">Esta versión utiliza por defecto el mismo dominio desde el que se abre la aplicación. Puedes cambiar la URL manualmente solo si necesitas probar otro servidor.</p>
-      <form id="apiForm" class="inline-form">
-        <label>URL de la API
-          <input id="apiUrl" type="url" placeholder="http://dev-prueba1.conaf.cl" required />
-        </label>
-        <button type="submit">Guardar y probar</button>
+  <nav class="tabs" aria-label="Secciones">
+    <button class="tab active" data-view="identify" type="button">Identificar</button>
+    <button class="tab" data-view="register" type="button">Registrar persona</button>
+    <button class="tab" data-view="people" type="button">Personas</button>
+    <button class="tab" data-view="history" type="button">Historial</button>
+  </nav>
+
+  <main class="app-shell">
+    <section id="view-identify" class="view active">
+      <div class="hero-card">
+        <div>
+          <span class="step">IDENTIFICACIÓN RÁPIDA</span>
+          <h2>Apunta la cámara al rostro</h2>
+          <p>Usa una foto o graba un clip breve. CarAis buscará automáticamente en la base de personas registradas.</p>
+        </div>
+        <div id="peopleCount" class="counter"><strong>—</strong><span>personas registradas</span></div>
+      </div>
+
+      <div class="capture-grid">
+        <article class="card capture-card">
+          <div class="card-title">
+            <span class="icon">📷</span>
+            <div><h3>Tomar una foto</h3><p>La opción más rápida para una persona quieta.</p></div>
+          </div>
+          <label class="capture-button primary-button">
+            Abrir cámara / elegir foto
+            <input id="identifyPhoto" type="file" accept="image/*,.jfif" capture="environment" />
+          </label>
+          <div id="photoPreviewWrap" class="media-preview hidden"><img id="photoPreview" alt="Foto seleccionada" /></div>
+          <button id="identifyPhotoButton" class="action-button hidden" type="button">Identificar en esta foto</button>
+        </article>
+
+        <article class="card capture-card">
+          <div class="card-title">
+            <span class="icon">🎥</span>
+            <div><h3>Video de 2 segundos</h3><p>Útil si la persona se mueve o cambia levemente el ángulo.</p></div>
+          </div>
+          <button id="recordVideoButton" class="primary-button" type="button">Grabar 2 segundos</button>
+          <label class="secondary-button file-label">
+            O elegir un video
+            <input id="identifyVideo" type="file" accept="video/mp4,video/quicktime,video/webm,video/*" capture="environment" />
+          </label>
+          <div id="videoPreviewWrap" class="media-preview hidden"><video id="videoPreview" controls playsinline muted></video></div>
+          <button id="identifyVideoButton" class="action-button hidden" type="button">Identificar en este video</button>
+        </article>
+      </div>
+
+      <section id="recognitionResult" class="result-panel idle">
+        <div class="result-symbol">◎</div>
+        <div><strong>Listo para identificar</strong><span>Selecciona foto o video.</span></div>
+      </section>
+
+      <section id="recognizedListCard" class="card hidden">
+        <h3>Personas encontradas</h3>
+        <div id="recognizedList" class="person-results"></div>
+      </section>
+    </section>
+
+    <section id="view-register" class="view">
+      <div class="section-intro">
+        <span class="step">BASE DE PERSONAS</span>
+        <h2>Registrar una persona</h2>
+        <p>Para mejorar la identificación agrega una foto frontal y, si puedes, otras dos con pequeños cambios de ángulo o iluminación.</p>
+      </div>
+
+      <form id="registerForm" class="card register-form">
+        <div class="form-grid">
+          <label>Nombre completo *<input id="personName" name="name" type="text" autocomplete="name" required placeholder="Ej. Juan Pérez" /></label>
+          <label>Identificador<input id="personExternalId" name="external_id" type="text" placeholder="RUT, código interno, etc." /></label>
+          <label class="full-field">Área / empresa<input id="personCompany" name="company" type="text" placeholder="Opcional" /></label>
+        </div>
+
+        <div class="photo-samples">
+          <label class="sample-box required-sample"><span>Foto principal *</span><small>Rostro frontal y bien iluminado</small><input id="registerPhoto1" type="file" accept="image/*,.jfif" capture="environment" required /></label>
+          <label class="sample-box"><span>Foto adicional</span><small>Leve giro del rostro</small><input id="registerPhoto2" type="file" accept="image/*,.jfif" capture="environment" /></label>
+          <label class="sample-box"><span>Foto adicional</span><small>Otra iluminación o ángulo</small><input id="registerPhoto3" type="file" accept="image/*,.jfif" capture="environment" /></label>
+        </div>
+
+        <div id="registerPreview" class="sample-previews"></div>
+        <button id="registerButton" class="primary-button save-button" type="submit">Guardar persona</button>
+        <div id="registerResult" class="inline-result hidden"></div>
       </form>
-      <div id="apiResult" class="result hidden"></div>
     </section>
 
-    <section class="card">
-      <h2>1. Fotografía grupal</h2>
-      <p class="muted">Selecciona la fotografía donde quieres buscar a una persona.</p>
-      <label class="file-box">Foto grupal
-        <input id="groupFile" type="file" accept="image/*" required />
-      </label>
-      <div class="preview-shell">
-        <canvas id="groupCanvas"></canvas>
-        <div id="groupPlaceholder" class="preview-placeholder">Sin fotografía seleccionada</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>2. Persona de referencia</h2>
-      <p class="muted">Usa una fotografía donde aparezca claramente la persona que quieres encontrar.</p>
-      <label class="file-box">Foto de referencia
-        <input id="referenceFile" type="file" accept="image/*" required />
-      </label>
-      <div class="preview-shell reference-preview">
-        <img id="referencePreview" alt="Vista previa de referencia" />
-        <div id="referencePlaceholder" class="preview-placeholder">Sin fotografía seleccionada</div>
-      </div>
-    </section>
-
-    <section class="card full primary">
-      <div class="action-row">
-        <div>
-          <h2>3. Buscar coincidencia</h2>
-          <p class="muted">El servidor analizará todas las caras de la fotografía grupal y las comparará con la referencia.</p>
-        </div>
-        <button id="analyzeButton" type="button">Buscar persona</button>
-      </div>
-
-      <div id="recognitionResult" class="recognition empty">
-        <div class="big-icon">◎</div>
-        <strong>Sin análisis todavía</strong>
-        <span>La mejor coincidencia aparecerá marcada sobre la fotografía.</span>
-      </div>
-    </section>
-
-    <section id="detailsCard" class="card full hidden">
+    <section id="view-people" class="view">
       <div class="section-head">
-        <div>
-          <h2>Detalle del análisis</h2>
-          <p class="muted">Ranking de rostros detectados, ordenado por similitud.</p>
-        </div>
+        <div><span class="step">BASE FACIAL</span><h2>Personas registradas</h2></div>
+        <button id="refreshPeople" class="secondary-button" type="button">Actualizar</button>
       </div>
-      <div id="metrics" class="metrics"></div>
-      <div id="matchesList" class="table-wrap"></div>
+      <div id="peopleList" class="people-grid"></div>
+      <div id="peopleEmpty" class="empty-state hidden">Todavía no hay personas registradas.</div>
     </section>
+
+    <section id="view-history" class="view">
+      <div class="section-head">
+        <div><span class="step">TRAZABILIDAD</span><h2>Últimas identificaciones</h2></div>
+        <button id="refreshHistory" class="secondary-button" type="button">Actualizar</button>
+      </div>
+      <div class="card table-card"><div id="historyList" class="table-wrap"></div></div>
+    </section>
+
+    <details class="connection-panel">
+      <summary>Configuración de conexión</summary>
+      <form id="apiForm" class="connection-form">
+        <label>URL del servidor local<input id="apiUrl" type="url" placeholder="https://dev-prueba1.conaf.cl" required /></label>
+        <button type="submit" class="secondary-button">Guardar y probar</button>
+      </form>
+      <p class="connection-help">GitHub Pages usa HTTPS. El servidor de reconocimiento también debe estar publicado mediante HTTPS para que el navegador permita la conexión.</p>
+      <div id="apiResult" class="inline-result hidden"></div>
+    </details>
   </main>
 
-  <script>
-    const currentOrigin = window.location.origin;
-    const storedApi = localStorage.getItem("carais_api_url");
-    if (!storedApi || storedApi.includes("172.31.2.42:8118")) {
-      localStorage.setItem("carais_api_url", currentOrigin);
-    }
-  </script>
   <script src="./app.js"></script>
 </body>
 </html>
