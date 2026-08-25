@@ -13,16 +13,16 @@
       <h1>Búsqueda facial en fotografías</h1>
       <p>Prueba integral · Frontend + servidor propio + InsightFace</p>
     </div>
-    <div id="health" class="status">Configura la API</div>
+    <div id="health" class="status">Conectando a API interna</div>
   </header>
 
   <main class="layout">
     <section class="card full connection-card">
       <h2>Conexión al motor de análisis</h2>
-      <p class="muted">Ingresa la URL del servidor donde está ejecutándose per_carAis. Para una prueba dentro de tu red puede ser, por ejemplo, http://192.168.1.50:8000.</p>
+      <p class="muted">Esta versión usa por defecto la API interna de vm3: http://172.31.2.42:8118. Puedes cambiarla manualmente si necesitas probar otro servidor.</p>
       <form id="apiForm" class="inline-form">
         <label>URL de la API
-          <input id="apiUrl" type="url" placeholder="http://IP_DEL_SERVIDOR:8000" required />
+          <input id="apiUrl" type="url" placeholder="http://172.31.2.42:8118" required />
         </label>
         <button type="submit">Guardar y probar</button>
       </form>
@@ -81,6 +81,11 @@
     </section>
   </main>
 
+  <script>
+    if (!localStorage.getItem("carais_api_url")) {
+      localStorage.setItem("carais_api_url", "http://172.31.2.42:8118");
+    }
+  </script>
   <script src="./app.js"></script>
 </body>
 </html>
