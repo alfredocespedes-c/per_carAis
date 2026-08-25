@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>per_carAis · Control de acceso</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <span class="eyebrow">PER · CARAIS</span>
+      <h1>Control de acceso facial</h1>
+      <p>Versión 1 · pruebas con fotografías</p>
+    </div>
+    <div id="health" class="status">Verificando...</div>
+  </header>
+  <main class="layout">
+    <section class="card">
+      <h2>Registrar persona</h2>
+      <p class="muted">Usa una foto frontal donde aparezca una sola persona.</p>
+      <form id="enrollForm">
+        <label>Nombre<input name="name" required placeholder="Ej. María González" /></label>
+        <label>ID / RUT<input name="external_id" placeholder="Opcional" /></label>
+        <label>Empresa<input name="company" placeholder="Opcional" /></label>
+        <label>Foto de referencia<input name="photo" type="file" accept="image/*" required /></label>
+        <button type="submit">Registrar persona</button>
+      </form>
+      <div id="enrollResult" class="result hidden"></div>
+    </section>
+    <section class="card primary">
+      <h2>Probar reconocimiento</h2>
+      <p class="muted">Sube otra foto de una persona registrada o de una persona desconocida.</p>
+      <form id="recognizeForm">
+        <label>Foto de prueba<input name="photo" type="file" accept="image/*" required /></label>
+        <button type="submit">Analizar foto</button>
+      </form>
+      <div id="recognitionResult" class="recognition empty">
+        <div class="big-icon">◎</div><strong>Sin prueba todavía</strong><span>El resultado aparecerá aquí.</span>
+      </div>
+    </section>
+    <section class="card full">
+      <div class="section-head"><div><h2>Personas registradas</h2><p class="muted">Base biométrica local de esta prueba.</p></div><button class="secondary" onclick="loadPeople()">Actualizar</button></div>
+      <div id="peopleList" class="table-wrap"></div>
+    </section>
+    <section class="card full">
+      <div class="section-head"><div><h2>Bitácora de pruebas</h2><p class="muted">Úsala para comparar aciertos y errores durante las pruebas.</p></div><button class="secondary" onclick="loadLogs()">Actualizar</button></div>
+      <div id="logsList" class="table-wrap"></div>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
