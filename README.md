@@ -1,73 +1,91 @@
-# per_carAis · V1
+# per_carAis · V1.3
 
-MVP de control de acceso mediante reconocimiento facial.
+MVP de control de acceso mediante reconocimiento facial con frontend web, backend FastAPI y despliegue en servidor local.
 
-## Qué permite esta V1
+## Funciones actuales
 
 - Registrar personas autorizadas.
-- Subir una foto de referencia por persona.
-- Subir una foto de prueba.
-- Detectar el rostro y compararlo contra las personas registradas.
-- Mostrar nombre, similitud estimada y decisión de acceso.
-- Guardar una bitácora de pruebas.
-- Cambiar el umbral de aceptación mediante variable de entorno.
-- Base preparada para incorporar cámara en vivo y controlador de torniquete.
+- Guardar múltiples fotografías de referencia por persona.
+- Identificar personas desde fotografía.
+- Identificar personas desde video corto.
+- Captura desde cámara del teléfono/navegador.
+- Listado de personas registradas.
+- Historial de reconocimientos.
+- Formatos JPG, JPEG, JFIF, PNG y WEBP.
+- Videos MP4, MOV, M4V, WEBM y 3GP.
+- Persistencia SQLite y muestras faciales en almacenamiento local.
 
-## Arquitectura
+## Arquitectura de servidor
 
-- Frontend: HTML/CSS/JavaScript.
-- Backend: FastAPI.
-- Reconocimiento: `face_recognition`.
-- Persistencia: SQLite.
-- Fotos: almacenamiento local en `data/faces/`.
+- Repositorio: `/home/acespedes/dev/per_carAis`
+- Entorno virtual: `/home/acespedes/dev/per_carAis/.venv`
+- Backend FastAPI: `127.0.0.1:8301`
+- Servicio systemd: `per-carais.service`
+- Frontend Nginx: `/var/www/per_carAis`
+- Dominio: `dev-prueba1.conaf.cl`
+- Configuración Nginx versionada: `deploy/dev-prueba1.conaf.cl.conf`
+- Servicio systemd versionado: `deploy/per-carais.service`
 
-## Importante
+## Actualizar servidor
 
-Esta versión es para pruebas controladas con personas previamente enroladas.
-No está pensada para identificar personas desconocidas contra bases externas.
-
-## Ejecución
-
-Recomendado: Python 3.11 o 3.12.
+Después de la instalación inicial, las siguientes actualizaciones se hacen con:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-# Windows:
-# .venv\Scripts\activate
-
-pip install -r requirements.txt
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+cd /home/acespedes/dev/per_carAis
+git pull origin main
+chmod +x deploy/update-server.sh
+./deploy/update-server.sh
 ```
 
-Luego abre:
+El script:
 
-http://localhost:8000
+1. Actualiza el repositorio.
+2. Crea el `.venv` si no existe.
+3. Instala/actualiza dependencias.
+4. Instala y reinicia `per-carais.service`.
+5. Copia el frontend a `/var/www/per_carAis`.
+6. Instala la configuración Nginx correcta.
+7. Valida y recarga Nginx.
+8. Comprueba `/api/health` por backend y por Nginx.
 
-## Cómo probar efectividad
+## Instalación inicial en un servidor nuevo
 
-1. Registra una persona con una foto frontal y bien iluminada.
-2. Usa otra foto distinta de la misma persona.
-3. Prueba fotos con:
-   - distinta iluminación;
-   - lentes;
-   - pequeñas rotaciones;
-   - distinta distancia;
-   - fondo distinto.
-4. Prueba también personas no registradas.
-5. Revisa la bitácora y compara similitud y resultado.
+```bash
+cd /home/acespedes/dev
+git clone https://github.com/alfredocespedes-c/per_carAis.git
+cd per_carAis
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+chmod +x deploy/update-server.sh
+./deploy/update-server.sh
+```
 
-Para una evaluación útil, recomendamos varias imágenes por persona y guardar:
-- verdaderos positivos;
-- falsos positivos;
-- verdaderos negativos;
-- falsos negativos.
+## Verificaciones
 
-## Próxima versión
+Backend directo:
 
-- Captura desde webcam.
-- Reconocimiento continuo por frames.
-- Confirmación por múltiples frames.
-- Liveness detection.
-- API segura para controlador de torniquete.
-- Gestión de vigencia, horarios y permisos por persona.
+```bash
+curl http://127.0.0.1:8301/api/health
+```
+
+Nginx local:
+
+```bash
+curl -H "Host: dev-prueba1.conaf.cl" http://127.0.0.1/api/health
+```
+
+Servicio:
+
+```bash
+sudo systemctl status per-carais.service --no-pager
+```
+
+## Datos persistentes
+
+La base y las muestras faciales viven en `data/`. No deben eliminarse durante una actualización normal.
+
+## Nota
+
+Esta aplicación está pensada para reconocer personas previamente enroladas en una base local. No busca ni identifica personas contra bases externas.
