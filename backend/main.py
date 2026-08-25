@@ -11,6 +11,7 @@ from pathlib import Path
 import face_recognition
 import numpy as np
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -22,8 +23,23 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 
 FACE_DIR.mkdir(parents=True, exist_ok=True)
 MATCH_THRESHOLD = float(os.getenv("CARAIS_MATCH_THRESHOLD", "0.50"))
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CARAIS_ALLOWED_ORIGINS",
+        "https://alfredocespedes-c.github.io,http://localhost:8000,http://127.0.0.1:8000",
+    ).split(",")
+    if origin.strip()
+]
 
-app = FastAPI(title="per_carAis API", version="1.0.0")
+app = FastAPI(title="per_carAis API", version="1.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
@@ -94,12 +110,18 @@ def save_upload(upload: UploadFile, folder: Path) -> Path:
 
 @app.get("/")
 def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
+    return {"ok": True, "service": "per_carAis", "version": "1.1.0", "docs": "/docs"}
 
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "service": "per_carAis", "version": "1.0.0", "match_threshold": MATCH_THRESHOLD}
+    return {
+        "ok": True,
+        "service": "per_carAis",
+        "version": "1.1.0",
+        "match_threshold": MATCH_THRESHOLD,
+        "storage": "ephemeral-local",
+    }
 
 
 @app.get("/api/people")
