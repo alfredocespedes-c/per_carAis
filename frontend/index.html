@@ -19,10 +19,10 @@
   <main class="layout">
     <section class="card full connection-card">
       <h2>Conexión al motor de análisis</h2>
-      <p class="muted">Esta versión usa por defecto la API interna de vm3: http://172.31.2.42:8118. Puedes cambiarla manualmente si necesitas probar otro servidor.</p>
+      <p class="muted">Esta versión utiliza por defecto el mismo dominio desde el que se abre la aplicación. Puedes cambiar la URL manualmente solo si necesitas probar otro servidor.</p>
       <form id="apiForm" class="inline-form">
         <label>URL de la API
-          <input id="apiUrl" type="url" placeholder="http://172.31.2.42:8118" required />
+          <input id="apiUrl" type="url" placeholder="http://dev-prueba1.conaf.cl" required />
         </label>
         <button type="submit">Guardar y probar</button>
       </form>
@@ -82,8 +82,10 @@
   </main>
 
   <script>
-    if (!localStorage.getItem("carais_api_url")) {
-      localStorage.setItem("carais_api_url", "http://172.31.2.42:8118");
+    const currentOrigin = window.location.origin;
+    const storedApi = localStorage.getItem("carais_api_url");
+    if (!storedApi || storedApi.includes("172.31.2.42:8118")) {
+      localStorage.setItem("carais_api_url", currentOrigin);
     }
   </script>
   <script src="./app.js"></script>
