@@ -1,14 +1,25 @@
+databases:
+  - name: per-carais-db
+    plan: free
+    databaseName: carais
+    user: carais
+
 services:
   - type: web
-    name: per-carais-api
+    name: per-carais
     runtime: python
     plan: free
-    branch: main
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    branch: render
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: uvicorn backend.render_main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
+    autoDeploy: true
     envVars:
-      - key: CARAIS_MATCH_THRESHOLD
-        value: "0.50"
-      - key: CARAIS_ALLOWED_ORIGINS
-        value: "https://alfredocespedes-c.github.io"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: per-carais-db
+          property: connectionString
+      - key: CARAIS_LBPH_THRESHOLD
+        value: "65"
+      - key: CARAIS_MAX_VIDEO_SECONDS
+        value: "2.5"
